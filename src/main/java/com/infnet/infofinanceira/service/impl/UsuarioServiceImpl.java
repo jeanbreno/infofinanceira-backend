@@ -30,13 +30,13 @@ public class UsuarioServiceImpl implements UsuarioService {
 		Optional<Usuario> usuario = repository.findByEmail(email);
 		
 		if(!usuario.isPresent()) {
-			throw new ErroAutenticacao("Usuário não encontrado para o email informado.");
+			throw new ErroAutenticacao("Credenciais inválidas.");
 		}
 		
 		boolean senhasBatem = encoder.matches(senha, usuario.get().getSenha());
 		
 		if(!senhasBatem) {
-			throw new ErroAutenticacao("Senha inválida.");
+			throw new ErroAutenticacao("Credenciais inválidas.");
 		}
 
 		return usuario.get();
@@ -60,7 +60,7 @@ public class UsuarioServiceImpl implements UsuarioService {
 	public void validarEmail(String email) {
 		boolean existe = repository.existsByEmail(email);
 		if(existe) {
-			throw new RegraNegocioException("Já existe um usuário cadastrado com este email.");
+			throw new RegraNegocioException("Email já cadastrado.");
 		}
 	}
 
