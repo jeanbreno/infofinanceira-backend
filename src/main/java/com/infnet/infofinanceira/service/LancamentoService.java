@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Optional;
 
 import com.infnet.infofinanceira.model.entity.Lancamento;
-import com.infnet.infofinanceira.model.entity.Usuario;
 import com.infnet.infofinanceira.model.enums.StatusLancamento;
 
 public interface LancamentoService {

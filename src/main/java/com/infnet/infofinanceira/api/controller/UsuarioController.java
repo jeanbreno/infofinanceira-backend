@@ -12,10 +12,12 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.infnet.infofinanceira.api.dto.TokenDTO;
 import com.infnet.infofinanceira.api.dto.UsuarioDTO;
 import com.infnet.infofinanceira.exception.ErroAutenticacao;
 import com.infnet.infofinanceira.exception.RegraNegocioException;
 import com.infnet.infofinanceira.model.entity.Usuario;
+import com.infnet.infofinanceira.service.JwtService;
 import com.infnet.infofinanceira.service.LancamentoService;
 import com.infnet.infofinanceira.service.UsuarioService;
 
@@ -28,29 +30,18 @@ public class UsuarioController {
 	
 	private final UsuarioService service;
 	private final LancamentoService lancamentoService;
+	private final JwtService jwtService;
 	
 	@PostMapping("/autenticar")
-	public ResponseEntity autenticar(@RequestBody UsuarioDTO dto) {
+	public ResponseEntity<?> autenticar( @RequestBody UsuarioDTO dto ) {
 		try {
-			Usuario usuarioAutenticado = service
-					.autenticar(dto.getEmail(), dto.getSenha());
-			return new ResponseEntity(usuarioAutenticado, HttpStatus.OK);
-		} catch (ErroAutenticacao e) {
+			Usuario usuarioAutenticado = service.autenticar(dto.getEmail(), dto.getSenha());
+			String token = jwtService.gerarToken(usuarioAutenticado);
+			TokenDTO tokenDTO = new TokenDTO( usuarioAutenticado.getNome(), token);
+			return ResponseEntity.ok(tokenDTO);
+		}catch (ErroAutenticacao e) {
 			return ResponseEntity.badRequest().body(e.getMessage());
 		}
-		
-	}
-	
-	@GetMapping("{id}/saldo")
-	public ResponseEntity obterSaldo( @PathVariable("id") Long id ) {
-		Optional<Usuario> usuario = service.obterPorId(id);
-		
-		if(!usuario.isPresent()) {
-			return new ResponseEntity( HttpStatus.NOT_FOUND );
-		}
-		
-		BigDecimal saldo = lancamentoService.obterSaldoPorUsuario(id);
-		return ResponseEntity.ok(saldo);
 	}
 	
 	@PostMapping
@@ -68,5 +59,28 @@ public class UsuarioController {
 		} catch (RegraNegocioException e) {
 			return ResponseEntity.badRequest().body(e.getMessage());
 		}
+	}
+	@GetMapping("{id}/saldo")
+	public ResponseEntity obterSaldo( @PathVariable("id") Long id ) {
+		Optional<Usuario> usuario = service.obterPorId(id);
+		
+		if(!usuario.isPresent()) {
+			return new ResponseEntity( HttpStatus.NOT_FOUND );
+		}
+		
+		BigDecimal saldo = lancamentoService.obterSaldoPorUsuario(id);
+		return ResponseEntity.ok(saldo);
+	}
+	
+	@GetMapping("{id}/nome")
+	public ResponseEntity obterNome( @PathVariable("id") Long id ) {
+		Optional<Usuario> usuario = service.obterPorId(id);
+		
+		if(!usuario.isPresent()) {
+			return new ResponseEntity( HttpStatus.NOT_FOUND );
+		}
+		
+		Optional<Usuario> nome = service.obterNomeDoUsuario(id);
+		return ResponseEntity.ok(nome);
 	}
 }

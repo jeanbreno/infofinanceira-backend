@@ -26,7 +26,7 @@ public class LancamentoServiceImpl implements LancamentoService {
 	public LancamentoServiceImpl(LancamentoRepository repository) {
 		this.repository = repository;
 	}
-	
+
 	@Override
 	@Transactional
 	public Lancamento salvar(Lancamento lancamento) {
@@ -44,29 +44,21 @@ public class LancamentoServiceImpl implements LancamentoService {
 	}
 
 	@Override
-	@Transactional(readOnly = true)
-	public List<Lancamento> buscar(Lancamento lancamentoFiltro) {
-		
-		//String sql = "select * from lancamento where 1=1";
-		//if(lancamentoFiltro.getDescricao() != null) {
-		//	sql = sql + " and descricao = " + lancamentoFiltro.getDescricao();
-		//}
-		
-		Example example = Example.of(lancamentoFiltro, ExampleMatcher
-								.matching()
-								.withIgnoreCase()
-								.withStringMatcher(StringMatcher.CONTAINING)
-								);
-		
-		return repository.findAll(example);
-	}
-
-	@Override
 	@Transactional
 	public void deletar(Lancamento lancamento) {
 		Objects.requireNonNull(lancamento.getId());
 		repository.delete(lancamento);
+	}
+
+	@Override
+	@Transactional(readOnly = true)
+	public List<Lancamento> buscar(Lancamento lancamentoFiltro) {
+		Example example = Example.of( lancamentoFiltro, 
+				ExampleMatcher.matching()
+					.withIgnoreCase()
+					.withStringMatcher(StringMatcher.CONTAINING) );
 		
+		return repository.findAll(example);
 	}
 
 	@Override
@@ -77,29 +69,29 @@ public class LancamentoServiceImpl implements LancamentoService {
 
 	@Override
 	public void validar(Lancamento lancamento) {
-
+		
 		if(lancamento.getDescricao() == null || lancamento.getDescricao().trim().equals("")) {
-			throw new RegraNegocioException("Informe uma descricao valida.");	
+			throw new RegraNegocioException("Informe uma Descrição válida.");
 		}
 		
-		if(lancamento.getMes() == null || lancamento.getMes() < 1 || lancamento.getMes() > 12 ) {
-			throw new RegraNegocioException("Informe um mes valido.");	
+		if(lancamento.getMes() == null || lancamento.getMes() < 1 || lancamento.getMes() > 12) {
+			throw new RegraNegocioException("Informe um Mês válido.");
 		}
 		
-		if(lancamento.getAno() == null || lancamento.getAno().toString().length() != 4) {
-			throw new RegraNegocioException("Informe um ano valido.");	
+		if(lancamento.getAno() == null || lancamento.getAno().toString().length() != 4 ) {
+			throw new RegraNegocioException("Informe um Ano válido.");
 		}
 		
 		if(lancamento.getUsuario() == null || lancamento.getUsuario().getId() == null) {
-			throw new RegraNegocioException("Informe um usuario.");	
+			throw new RegraNegocioException("Informe um Usuário.");
 		}
 		
-		if(lancamento.getValor() == null || lancamento.getValor().compareTo(BigDecimal.ZERO) < 1) {
-			throw new RegraNegocioException("Informe um valor valido.");	
+		if(lancamento.getValor() == null || lancamento.getValor().compareTo(BigDecimal.ZERO) < 1 ) {
+			throw new RegraNegocioException("Informe um Valor válido.");
 		}
 		
 		if(lancamento.getTipo() == null) {
-			throw new RegraNegocioException("Informe um tipo de lancamento.");	
+			throw new RegraNegocioException("Informe um tipo de Lançamento.");
 		}
 	}
 
@@ -112,10 +104,8 @@ public class LancamentoServiceImpl implements LancamentoService {
 	@Transactional(readOnly = true)
 	public BigDecimal obterSaldoPorUsuario(Long id) {
 		
-		BigDecimal receitas = repository
-				.obterSaldoPorTipoLancamentoEUsuarioEStatus(id, TipoLancamento.RECEITA, StatusLancamento.EFETIVADO);
-		BigDecimal despesas = repository
-				.obterSaldoPorTipoLancamentoEUsuarioEStatus(id, TipoLancamento.DESPESA, StatusLancamento.EFETIVADO);
+		BigDecimal receitas = repository.obterSaldoPorTipoLancamentoEUsuarioEStatus(id, TipoLancamento.RECEITA, StatusLancamento.EFETIVADO);
+		BigDecimal despesas = repository.obterSaldoPorTipoLancamentoEUsuarioEStatus(id, TipoLancamento.DESPESA, StatusLancamento.EFETIVADO);
 		
 		if(receitas == null) {
 			receitas = BigDecimal.ZERO;
@@ -128,5 +118,4 @@ public class LancamentoServiceImpl implements LancamentoService {
 		return receitas.subtract(despesas);
 	}
 
-	
 }
