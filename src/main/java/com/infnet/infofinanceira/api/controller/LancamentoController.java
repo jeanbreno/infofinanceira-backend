@@ -92,6 +92,7 @@ public class LancamentoController {
 		}
 		
 		List<Lancamento> lancamentos = service.buscar(lancamentoFiltro);
+		
 		return ResponseEntity.ok(lancamentos);
 	}
 	

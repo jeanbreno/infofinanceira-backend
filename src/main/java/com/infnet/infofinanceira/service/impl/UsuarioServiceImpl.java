@@ -1,7 +1,12 @@
 package com.infnet.infofinanceira.service.impl;
 
+import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
+import org.springframework.data.domain.Example;
+import org.springframework.data.domain.ExampleMatcher;
+import org.springframework.data.domain.ExampleMatcher.StringMatcher;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -44,8 +49,10 @@ public class UsuarioServiceImpl implements UsuarioService {
 
 	@Override
 	@Transactional
-	public Usuario salvarUsuario(Usuario usuario) {
-		validarEmail(usuario.getEmail());
+	public Usuario salvarUsuario(Usuario usuario, String req) {
+		if(req == "s") {
+			validarEmail(usuario.getEmail());
+		}
 		criptografarSenha(usuario);
 		return repository.save(usuario);
 	}
@@ -75,6 +82,22 @@ public class UsuarioServiceImpl implements UsuarioService {
 	@Transactional
 	public Optional<Usuario> obterNomeDoUsuario(Long id) {
 		return repository.findByIdUser(id);
+	}
+
+	@Override
+	@Transactional
+	public Usuario atualizar(Usuario usuario) {
+		Objects.requireNonNull(usuario.getId());
+
+		return repository.save(usuario);
+	}
+
+	@Override
+	@Transactional(readOnly = true)
+	public Optional<Usuario> buscar(Long id) {
+
+		Optional<Usuario> result = repository.findById(id);
+		return result;
 	}
 
 }
